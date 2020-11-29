@@ -40,12 +40,12 @@ class Bird:
         self.jump_ticks = 0
         self.height = self.y
 
-    def move(self):
+    def move(self, fps):
         if self.started:
             self.ticks += 1
             self.jump_ticks += 1
 
-            d = (self.vel * self.jump_ticks) + (0.5 * 3 * (self.jump_ticks ** 2))
+            d = (self.vel * self.jump_ticks) + (0.5 * (fps / 10) * (self.jump_ticks ** 2))
 
             if d >= 16:
                 d = (d / abs(d)) * 16

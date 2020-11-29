@@ -24,7 +24,7 @@ class Game:
         pygame.display.set_caption("Flappy Bird")
 
         self.clock = pygame.time.Clock()
-        self.FPS = 20
+        self.FPS = 30
         self.gen = 0
 
         y = assets["bg"].get_height() - assets["base"].get_height()
@@ -47,7 +47,8 @@ class Game:
             for _, g in genomes:
                 net = neat.nn.FeedForwardNetwork.create(g, config)
                 self.nets.append(net)
-                self.birds.append(Bird(*self.bird_args))
+                bird = Bird(*self.bird_args)
+                self.birds.append(bird)
                 g.fitness = 0
                 self.ge.append(g)
 
@@ -86,11 +87,17 @@ class Game:
 
             self.draw()
 
-            for i, bird in enumerate(self.birds):
-                bird.move()
+            for i, bird in enumerate(self.birds[:]):
+                bird.move(self.FPS)
 
                 if settings.AI:
-                    self.ge[i].fitness += 0.1
+                    try:
+                        self.ge[i].fitness += 0.1
+                    except:
+                        pass
+
+                if bird.score >= 999:
+                    self.over(bird)
 
             self.handle_keys(pygame.key.get_pressed())
 
