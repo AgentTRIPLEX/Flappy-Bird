@@ -54,9 +54,6 @@ class Game:
         self.run = True
         add_pipe = True
 
-        if not settings.AI:
-            threading.Thread(target=self.handle_keys).start()
-
         while self.run:
             self.clock.tick(self.FPS)
 
@@ -89,24 +86,13 @@ class Game:
 
             self.draw()
 
-            pipe_ind = 0
-            if settings.AI:
-                if len(self.birds) > 0:
-                    if len(self.pipes) > 1:
-                        if self.birds[0].x > (self.pipes[0].x + self.pipes[0].top_img.get_width()):
-                            pipe_ind = 1
-
             for i, bird in enumerate(self.birds):
                 bird.move()
 
                 if settings.AI:
                     self.ge[i].fitness += 0.1
-                    if len(self.pipes) > 0:
-                        pipe = self.pipes[pipe_ind]
-                        output = self.nets[i].activate((bird.y, abs(bird.y - pipe.height), abs(bird.y - pipe.bottom)))
 
-                        if output[0] > 0.5:
-                            bird.jump()
+            self.handle_keys(pygame.key.get_pressed())
 
             self.base.move()
 
@@ -182,10 +168,23 @@ class Game:
         p = Pipe(assets["pipe"], x, 110)
         self.pipes.append(p)
 
-    def handle_keys(self):
-        while self.run:
-            keys = pygame.key.get_pressed()
+    def handle_keys(self, keys):
+        pipe_ind = 0
+        if settings.AI:
+            if len(self.birds) > 0:
+                if len(self.pipes) > 1:
+                    if self.birds[0].x > (self.pipes[0].x + self.pipes[0].top_img.get_width()):
+                        pipe_ind = 1
 
+            for i, bird in enumerate(self.birds):
+                if len(self.pipes) > 0:
+                    pipe = self.pipes[pipe_ind]
+                    output = self.nets[i].activate((bird.y, abs(bird.y - pipe.height), abs(bird.y - pipe.bottom)))
+
+                    if output[0] > 0.5:
+                        bird.jump()
+
+        else:
             if keys[pygame.K_SPACE] or keys[pygame.K_w] or keys[pygame.K_UP]:
                 self.birds[0].jump()
                 time.sleep(0.3)
